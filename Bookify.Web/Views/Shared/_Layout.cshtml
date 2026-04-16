@@ -64,6 +64,7 @@
     <link rel="stylesheet" href="~/assets/css/style.bundle.css" type="text/css" />
     <!--end::Global Stylesheets Bundle-->
     <link href="~/lib/animate.css/animate.min.css" rel="stylesheet" />
+    @await RenderSectionAsync("Stylse", required: false)
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Bookify.Web.styles.css" asp-append-version="true" />
 </head>
@@ -119,6 +120,7 @@
     <script src="~/lib/bootbox.js/bootbox.all.js"></script>
     <script src="~/lib/bootbox.js/bootbox.all.min.js"></script>
     <!--end::Global Javascript Bundle-->
+    @await RenderSectionAsync("Plugins", required: false)
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
