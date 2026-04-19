@@ -21,6 +21,9 @@ function showErrorMessage(message = 'Something went wrong!') {
     });
 }
 
+function onModalBegin() {
+    $('body :submit').attr('disabled', 'disabled').attr('data-kt-indicator', 'on');
+}
 function onModalSuccess(row) {
     showSuccessMessage();
     $('#Modal').modal('hide');
@@ -36,7 +39,10 @@ function onModalSuccess(row) {
 
 
     KTMenu.init();
-    KTMenu.initHandlers();
+    KTMenu.initGlobalHandlers();
+}
+function onModalComplete() {
+    $('body :submit').removeAttr('disabled').removeAttr('data-kt-indicator');
 }
 
 //DataTables
@@ -57,7 +63,7 @@ var KTDatatables = function () {
         // Init datatable --- more info on datatables: https://datatables.net/manual/
         datatable = $(table).DataTable({
             "info": false,
-            'order': [],
+            
             'pageLength': 10,
         });
     }
@@ -173,4 +179,59 @@ $(document).ready(function () {
         modal.modal('show');
     });
 
+    //Handel Toggle Status
+    $('body').delegate('.js-toggle-status', 'click', function () {
+
+        var btn = $(this);
+
+
+        bootbox.confirm({
+            message: 'Are You Sure That You Need To Toggle This Status ?',
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-danger'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-secondary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    $.post({
+                        url: btn.data('url'),
+                        data: {
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (LastUpdatedOn) {
+
+                            var row = btn.closest('tr');
+                            var status = row.find('.js-status');
+
+                            var newStatus = status.text().trim() === 'Deleted'
+                                ? 'Available'
+                                : 'Deleted';
+
+                            status.text(newStatus)
+                                .toggleClass('badge-light-success badge-light-danger');
+
+                            row.find('.js-updated-on').html(LastUpdatedOn);
+                            row.addClass('animate__animated animate__flash');
+                            showSuccessMessage();
+                        },
+                        error: function () {
+                            showErrorMessage();
+                        }
+
+                    });
+
+                }
+
+            }
+        });
+
+
+
+    });
 });
