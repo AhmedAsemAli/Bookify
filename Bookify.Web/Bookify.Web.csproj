@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-Bookify.Web-513089f4-2429-4e4d-a312-f15232568bac</UserSecretsId>
-	  <NoWarn>NU1901</NoWarn>
+	  <NoWarn>NU1901,NU1903</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

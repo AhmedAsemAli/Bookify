@@ -1,6 +1,6 @@
-﻿@model IEnumerable<CategoryViewModel>
+﻿@model IEnumerable<AuthorViewModel>
 @{
-    ViewData["Title"] = "Categories";
+    ViewData["Title"] = "Authors";
 }
 @section Stylse {
     <link href="~/assets/plugins/datatables/datatables.bundle.css" rel="stylesheet" />
@@ -21,13 +21,13 @@
         </div>
         <!--begin::Content-->
         <div class="d-flex flex-column pe-0 pe-sm-10">
-            <h5 class="mb-1">Categories</h5>
+            <h5 class="mb-1">Authors</h5>
         </div>
         <!--end::Content-->
     </div>
     <div>
         <a href="javascript:;" class="btn btn-sm btn-primary js-render-modal"
-           data-title="Add Category" data-url="/Categories/Create">
+               data-title="Add Author" data-url="/Authors/Create">
             <i class="bi bi-plus-square-dotted"></i>
             Add
         </a>
@@ -35,10 +35,10 @@
 </div>
 
 <div class="card shadow-sm">
-<partial name="_DataTablesCardHeader" />
+    <partial name="_DataTablesCardHeader" />
     <div class="card-body pt-0">
         <div class="table-responsive">
-            <table class="table table-row-dashed table-row-gray-300 gy-7 js-datatables" data-document-titel="Categories">
+            <table class="table table-row-dashed table-row-gray-300 gy-7 js-datatables" data-document-titel="Authors">
                 <thead>
                     <tr class="fw-bold fs-6 text-gray-800">
                         <th>Name</th>
@@ -49,9 +49,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var category in Model)
+                    @foreach (var author in Model)
                     {
-                        <partial name="_CategoryRow" model="@category" />
+                        <partial name="_AuthorRow" model="@author" />
                     }
                 </tbody>
             </table>

@@ -1,10 +1,7 @@
-﻿
-using Microsoft.EntityFrameworkCore;
-
-namespace Bookify.Web.Core.Models
+﻿namespace Bookify.Web.Core.Models
 {
-    [Index(nameof(Name),IsUnique =true)]
-    public class Category
+    [Index(nameof(Name), IsUnique = true)]
+    public class Author
     {
         public int Id { get; set; }
         [MaxLength(100)]
@@ -12,7 +9,5 @@ namespace Bookify.Web.Core.Models
         public bool isDeleted { get; set; }
         public DateTime CreatedOn { get; set; } = DateTime.Now;
         public DateTime? LastUpdatedOn { get; set; }
-
-        public ICollection<BookCategory> Books { get; set; } = new List<BookCategory>();
     }
 }
