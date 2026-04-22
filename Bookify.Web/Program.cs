@@ -1,6 +1,9 @@
 using Bookify.Web.Core.Mapping;
+using Bookify.Web.Settings;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using System.Reflection;
+using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
 
 namespace Bookify.Web
 {
@@ -19,7 +22,12 @@ namespace Bookify.Web
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+           
             builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(MappingProfile)));
+
+            builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)));
+            builder.Services.AddExpressiveAnnotations();
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
