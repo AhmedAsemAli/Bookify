@@ -20,5 +20,6 @@
         public string Description { get; set; } = null!;
 
         public IEnumerable<string> Categories { get; set; } = null!;
+        public IEnumerable<BookCopyViewModel> Copies { get; set; } = null!;
     }
 }
