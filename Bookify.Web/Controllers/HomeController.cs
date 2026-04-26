@@ -1,7 +1,9 @@
+
 using System.Diagnostics;
 
 namespace Bookify.Web.Controllers
 {
+    [Authorize(Roles ="Admin")]
     public class HomeController : Controller
     {
         public IActionResult Index()

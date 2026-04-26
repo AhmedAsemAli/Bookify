@@ -1,15 +1,18 @@
 using Bookify.Web.Core.Mapping;
+using Bookify.Web.Seeds;
 using Bookify.Web.Settings;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using System.Reflection;
 using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
+using Bookify.Web.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bookify.Web
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -17,10 +20,25 @@ namespace Bookify.Web
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
+
+           // builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            //builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            //    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            builder.Services.AddIdentity<ApplicationUser,IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultUI()
+                .AddDefaultTokenProviders();
+
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequiredLength = 8;
+
+                options.User.RequireUniqueEmail = true;
+            });
+
             builder.Services.AddControllersWithViews();
            
             builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(MappingProfile)));
@@ -43,9 +61,21 @@ namespace Bookify.Web
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
+
+            var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+            using var scope =scopeFactory.CreateScope();
+            var roleManger = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManger = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+            await DefaultRoles.SeedAsync(roleManger);
+            await DefaultUsers.SeedAdminUserAsync(userManger);
+
 
             app.MapStaticAssets();
             app.MapControllerRoute(

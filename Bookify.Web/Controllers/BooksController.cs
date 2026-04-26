@@ -9,12 +9,14 @@ using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using System.Linq.Dynamic.Core;
+using System.Security.Claims;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxTokenParser;
 using static System.Reflection.Metadata.BlobBuilder;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Bookify.Web.Controllers
 {
+    [Authorize(Roles = AppRoles.Archive)]
     public class BooksController : Controller
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
@@ -159,6 +161,7 @@ namespace Bookify.Web.Controllers
                 //book.ImagePublicId = result.PublicId;
             }
 
+            book.CreatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             foreach (var category in model.SelectedCategories)
             {
                 book.Categories.Add(new BookCategory { CategoryId = category });
@@ -192,7 +195,10 @@ namespace Bookify.Web.Controllers
             if (!ModelState.IsValid)
                 return View("Form", PopulateViewModel(model));
 
-            var book = _context.Books.Include(b => b.Categories).SingleOrDefault(b => b.Id == model.Id);
+            var book = _context.Books
+                .Include(b => b.Categories)
+                .Include(b => b.Copies)
+                .SingleOrDefault(b => b.Id == model.Id);
 
             if (book is null)
                 return NotFound();
@@ -269,12 +275,17 @@ namespace Bookify.Web.Controllers
             }
 
             book = _mapper.Map(model, book);
+            book.LastUpdatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             book.LastUpdatedOn = DateTime.Now;
            // book.ImageThumbnailUrl = GetThumbnailUrl(book.ImageUrl!);
            // book.ImagePublicId = imagePublicId;
 
             foreach (var category in model.SelectedCategories)
                 book.Categories.Add(new BookCategory { CategoryId = category });
+
+            if (!model.IsAvailableForRental)
+                foreach (var copy in book.Copies)
+                    copy.IsAvilableForRental = false;
 
             _context.SaveChanges();
 
@@ -293,6 +304,7 @@ namespace Bookify.Web.Controllers
                 return NotFound();
 
             book.isDeleted = !book.isDeleted;
+            book.LastUpdatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             book.LastUpdatedOn = DateTime.Now;
 
             _context.SaveChanges();

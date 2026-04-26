@@ -4,11 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bookify.Web.Data
 {
-    //public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext(options)
-    //{
-    //    public DbSet<Category> Categories { get; set; }
-    //}
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

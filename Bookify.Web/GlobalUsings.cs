@@ -6,3 +6,5 @@ global using Bookify.Web.Core.ViewModels;
 global using Bookify.Web.Filters;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.AspNetCore.Authorization;
+global using Bookify.Web.Core.Consts;

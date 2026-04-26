@@ -5,7 +5,8 @@ namespace Bookify.Web.Core.ViewModels
     public class AuthorFormViewModel
     {
         public int Id { get; set; }
-        [MaxLength(100, ErrorMessage = "Length cannot be more than 100 characters"), DisplayName("Author")]
+        [MaxLength(100, ErrorMessage = "Length cannot be more than 100 characters"), DisplayName("Author"),
+     RegularExpression(RegexPatterns.CharactersOnly_Eng, ErrorMessage = Errors.OnlyEnglishLetters)]
         [Remote("AllowItem", null!, AdditionalFields = "Id", ErrorMessage = "Author with The Same Name is Already Exist")]
         public string Name { get; set; } = null!;
     }

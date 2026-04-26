@@ -15,9 +15,12 @@ function showSuccessMessage(message = 'Saved successfully!') {
 
 function showErrorMessage(message = 'Something went wrong!') {
     Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: message
+        icon: 'error',
+        title: 'Oops...',
+        text: message.responseText !== undefined ? message.responseText : message,
+        customClass: {
+            confirmButton: "btn btn-primary"
+        }
     });
 }
 
@@ -46,6 +49,14 @@ function onModalSuccess(row) {
 }
 function onModalComplete() {
     $('body :submit').removeAttr('disabled').removeAttr('data-kt-indicator');
+}
+
+//Select2
+function applySelect2() {
+    $('.js-select2').select2({});
+    $('.js-select2').on('select2:select', function (e) {
+        $('form').not('#SignOut').validate().element('#' + $(this).attr('id'));
+    });
 }
 
 //DataTables
@@ -149,7 +160,7 @@ var KTDatatables = function () {
 $(document).ready(function () {
 
     //Disable submit button
-    $('form').on('submit', function () {
+    $('form').not('#SignOut').on('submit', function () {
         if ($('.js-tinymce').length > 0) {
             $('.js-tinymce').each(function () {
                 var input = $(this);
@@ -178,11 +189,7 @@ $(document).ready(function () {
 
 
     //Select2
-    $('.js-select2').select2({});
-    $('.js-select2').on('select2:select', function (e) {
-        $('form').validate().element('#' + $(this).attr('id'));
-    });
-
+    applySelect2();
 
     //Datepicker
     $('.js-datepicker').daterangepicker({
@@ -217,7 +224,8 @@ $(document).ready(function () {
             url: btn.data('url'),
             success: function (form) {
                 modal.find('.modal-body').html(form);
-                $.validator.unobtrusive.parse(modal)
+                $.validator.unobtrusive.parse(modal);
+                applySelect2();
             },
             error: function () {
                 showErrorMessage();
@@ -279,8 +287,11 @@ $(document).ready(function () {
 
             }
         });
-
-
-
     });
+
+    //Handel signout
+    $('.js-signout').on('click', function () {
+        $('#SignOut').submit();
+    });
+
 });
