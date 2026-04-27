@@ -7,6 +7,7 @@ using System.Reflection;
 using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
 using Bookify.Web.Data;
 using Microsoft.EntityFrameworkCore;
+using Bookify.Web.Helpers;
 
 namespace Bookify.Web
 {
@@ -38,6 +39,8 @@ namespace Bookify.Web
 
                 options.User.RequireUniqueEmail = true;
             });
+
+            builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
             builder.Services.AddControllersWithViews();
            

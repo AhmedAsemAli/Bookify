@@ -213,5 +213,38 @@ namespace Bookify.Web.Controllers
 
             return BadRequest(string.Join(',', result.Errors.Select(e => e.Description)));
         }
+
+        //public async Task<IActionResult> UnLock(string id) 
+        //{
+        //    var user=await _userManager.FindByIdAsync(id);
+        //    if (user is null)
+        //        return NotFound();
+
+        //    if (await _userManager.IsLockedOutAsync(user))
+        //    {
+        //        await _userManager.SetLockoutEndDateAsync(user, null);
+        //        user.LastUpdatedOn = DateTime.Now;
+        //        user.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        //        await _userManager.UpdateAsync(user);
+        //    }
+        //    return Ok();
+        //}
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unlock(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user is null)
+                return NotFound();
+
+            var isLocked = await _userManager.IsLockedOutAsync(user);
+
+            if (isLocked)
+                await _userManager.SetLockoutEndDateAsync(user, null);
+
+            return Ok();
+        }
     }
 }
