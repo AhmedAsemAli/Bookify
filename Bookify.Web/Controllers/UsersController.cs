@@ -1,8 +1,13 @@
 ﻿
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Routing.Template;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Encodings.Web;
 
 namespace Bookify.Web.Controllers
 {
@@ -12,16 +17,34 @@ namespace Bookify.Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IMapper _mapper;
+        private readonly IEmailSender _emailSender;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IEmailBodyBuilder _emailBodyBuilder;
 
-        public UsersController(UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager)
+        public UsersController(UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailSender emailSender, IWebHostEnvironment webHostEnvironment, IEmailBodyBuilder emailBodyBuilder)
         {
             _userManager = userManager;
             _mapper = mapper;
             _roleManager = roleManager;
+            _emailSender = emailSender;
+            _webHostEnvironment = webHostEnvironment;
+            _emailBodyBuilder = emailBodyBuilder;
         }
 
         public async Task<IActionResult> Index()
         {
+            //var filePath = $"{_webHostEnvironment.WebRootPath}/templates/email.html";
+            //StreamReader str = new(filePath);
+            //var body=str.ReadToEnd();
+            //str.Close();
+            //body = body
+            //    .Replace("[imageUrl]", "")
+            //    .Replace("[url]", "")
+            //    .Replace("[linkTitle]", "active acc")
+            //    .Replace("[body]", "please confirm")
+            //    .Replace("[header]", "hey mohamed");
+                
+            //await _emailSender.SendEmailAsync("ahmed.hendia1701497@science.menofia.edu.eg", "test", body);
             var users=await _userManager.Users.ToListAsync();
             var viewModel = _mapper.Map<IEnumerable<UserViewModel>>(users);
             return View(viewModel);
@@ -65,6 +88,27 @@ namespace Bookify.Web.Controllers
             if (result.Succeeded)
             {
                 await _userManager.AddToRolesAsync(user, model.SelectedRoles);
+
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                var callbackUrl = Url.Page(
+                    "/Account/ConfirmEmail",
+                    pageHandler: null,
+                    values: new { area = "Identity", userId = user.Id, code },
+                    protocol: Request.Scheme);
+
+
+
+                var body = _emailBodyBuilder.GetEmailBody(
+                        "https://res.cloudinary.com/devcreed/image/upload/v1668732314/icon-positive-vote-1_rdexez.svg",
+                        $"Hey {user.FullName}, thanks for joining us!",
+                        "please confirm your email",
+                        $"{HtmlEncoder.Default.Encode(callbackUrl!)}",
+                        "Active Account!"
+                    );
+
+                await _emailSender.SendEmailAsync(user.Email, "Confirm your email",body);
+
                 var viewModel=_mapper.Map<UserViewModel>(user);
                 return PartialView("_UserRow", viewModel);
             }
@@ -104,6 +148,11 @@ namespace Bookify.Web.Controllers
             user.LastUpdatedOn = DateTime.Now;
            
             await _userManager.UpdateAsync(user);
+            if (user.IsDeleted)
+            {
+                await _userManager.UpdateSecurityStampAsync(user);
+            }
+
             return Ok(user.LastUpdatedOn.ToString());
         }
 
@@ -207,6 +256,7 @@ namespace Bookify.Web.Controllers
                     await _userManager.AddToRolesAsync(user, model.SelectedRoles);
                 }
 
+                await _userManager.UpdateSecurityStampAsync(user);
                 var viewModel = _mapper.Map<UserViewModel>(user);
                 return PartialView("_UserRow", viewModel);
             }

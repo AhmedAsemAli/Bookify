@@ -120,6 +120,7 @@ namespace Bookify.Web.Areas.Identity.Pages.Account
                 var userName = Input.Username.ToUpper();
                 var user = await _userManager.Users
                     .SingleOrDefaultAsync(u =>( u.NormalizedUserName == userName || u.NormalizedEmail == userName )&& !u.IsDeleted);
+              
                 if (user is null)
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
@@ -141,6 +142,10 @@ namespace Bookify.Web.Areas.Identity.Pages.Account
                 {
                     _logger.LogWarning("User account locked out.");
                     return RedirectToPage("./Lockout");
+                }
+                if (result.IsNotAllowed)
+                {
+                    return RedirectToPage("./ResendEmailConfirmation", new {userName=Input.Username });
                 }
                 else
                 {
