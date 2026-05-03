@@ -8,7 +8,7 @@
 
         if (governorateId !== '') {
             $.ajax({
-                url: '/Subscripers/GetAreas?governorateId=' + governorateId,
+                url: '/Subscribers/GetAreas?governorateId=' + governorateId,
                 success: function (areas) {
                     $.each(areas, function (i, area) {
                         var item = $('<option></option>').attr("value", area.value).text(area.text);

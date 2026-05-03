@@ -3,7 +3,7 @@
     [Index(nameof(NationalId), IsUnique = true)]
     [Index(nameof(MobileNumber), IsUnique = true)]
     [Index(nameof(Email), IsUnique = true)]
-    public class Subscriper:BaseModel
+    public class Subscriber:BaseModel
     {
         public int Id { get; set; }
 

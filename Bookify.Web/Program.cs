@@ -42,6 +42,8 @@ namespace Bookify.Web
                 options.User.RequireUniqueEmail = true;
             });
 
+            builder.Services.AddDataProtection().SetApplicationName(nameof(Bookify));
+
             builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
             builder.Services.AddTransient<IImageService, ImageService>();
