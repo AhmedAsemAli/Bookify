@@ -1,8 +1,13 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Linq.Dynamic.Core;
+using System.Text.Encodings.Web;
+using WhatsAppCloudApi;
+using WhatsAppCloudApi.Services;
 
 namespace Bookify.Web.Controllers
 {
@@ -13,17 +18,25 @@ namespace Bookify.Web.Controllers
         private readonly IMapper _mapper;
         private readonly IImageService _imageService;
         private readonly IDataProtector _dataProtector;
-
-        public SubscribersController(ApplicationDbContext context, IMapper mapper, IImageService imageService, IDataProtectionProvider dataProtector)
+        private readonly IWhatsAppClient _whatsAppClient;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IEmailBodyBuilder _emailBodyBuilder;
+        private readonly IEmailSender _emailSender;
+        public SubscribersController(ApplicationDbContext context, IMapper mapper, IImageService imageService, IDataProtectionProvider dataProtector, IWhatsAppClient whatsAppClient, IWebHostEnvironment webHostEnvironment, IEmailBodyBuilder emailBodyBuilder, IEmailSender emailSender)
         {
             _context = context;
             _mapper = mapper;
             _imageService = imageService;
             _dataProtector = dataProtector.CreateProtector("MySecureKey");
+            _whatsAppClient = whatsAppClient;
+            _webHostEnvironment = webHostEnvironment;
+            _emailBodyBuilder = emailBodyBuilder;
+            _emailSender = emailSender;
         }
 
         public IActionResult Index()
         {
+
             return View();
         }
 
@@ -78,6 +91,42 @@ namespace Bookify.Web.Controllers
             _context.Add(subscriber);
             _context.SaveChanges();
 
+            //send welcome email
+            var placeholders = new Dictionary<string, string>()
+                {
+                    {"imageUrl", "https://res.cloudinary.com/dfrvheqw9/image/upload/v1777908525/icon-positive-vote-2_jcxdww_2_ti6gst.svg"},
+                    {"header",    $"Welcome {model.FirstName}," },
+                    {"body",  " thanks for joining  Bookify" }
+                 
+                };
+            var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Notification, placeholders);
+
+
+            await _emailSender.SendEmailAsync(model.Email, "Welcome to Bookify", body);
+        
+
+            //send welcome WhatsApp
+            if (model.HasWhatsApp)
+            {
+                //var components = new List<WhatsAppComponent>()
+                //{
+                //    new WhatsAppComponent
+                //    {
+                //        Type="body",
+                //        Parameters=new List<object>()
+                //        {
+                //                  new WhatsAppTextParameter{ Text=model.FirstName}
+                //        }
+                //    }
+                //};
+
+                var mobileNumber= _webHostEnvironment
+                    .IsDevelopment() ? "01012905054" : model.MobileNumber;
+
+                await _whatsAppClient
+                 .SendMessage($"2{mobileNumber}", WhatsAppLanguageCode.English_US, "hello_world"/*, components*/);
+           
+            }
 
             var subscriberId = _dataProtector.Protect(subscriber.Id.ToString());
             return RedirectToAction(nameof(Details), new { id = subscriberId });
