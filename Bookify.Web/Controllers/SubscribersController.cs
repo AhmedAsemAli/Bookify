@@ -88,6 +88,16 @@ namespace Bookify.Web.Controllers
             subscriber.ImageThumbnailUrl = $"{imagePath}/thumb/{imageName}";
             subscriber.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
+            Subscription subscriptions = new()
+            {
+                CreatedById = subscriber.CreatedById,
+                CreatedOn = subscriber.CreatedOn,
+                StartDate= DateTime.Today,
+                EndDate= DateTime.Today.AddYears(1)
+            };
+
+            subscriber.Subscriptions.Add(subscriptions);
+
             _context.Add(subscriber);
             _context.SaveChanges();
 
@@ -137,8 +147,11 @@ namespace Bookify.Web.Controllers
         public IActionResult Details(string id) 
         {
             var subscriberId =int.Parse(_dataProtector.Unprotect(id));
-            var subscriber=_context.Subscribers.Include(s=>s.Governorate)
-                .Include(s=>s.Area).FirstOrDefault(s=>s.Id== subscriberId);
+            var subscriber=_context.Subscribers
+                .Include(s=>s.Governorate)
+                .Include(s=>s.Area)
+                .Include(s=>s.Subscriptions)
+                .FirstOrDefault(s=>s.Id== subscriberId);
 
             if (subscriber is null)
                 return NotFound();
@@ -175,15 +188,15 @@ namespace Bookify.Web.Controllers
           var  subscriberId = int.Parse(_dataProtector.Unprotect(model.Key));
 
 
-            var Subscriber = _context.Subscribers.Find(subscriberId);
+            var subscriber = _context.Subscribers.Find(subscriberId);
 
-            if (Subscriber is null)
+            if (subscriber is null)
                 return NotFound();
 
             if (model.Image is not null)
             {
-                if (!string.IsNullOrEmpty(Subscriber.ImageUrl))
-                    _imageService.Delete(Subscriber.ImageUrl, Subscriber.ImageThumbnailUrl);
+                if (!string.IsNullOrEmpty(subscriber.ImageUrl))
+                    _imageService.Delete(subscriber.ImageUrl, subscriber.ImageThumbnailUrl);
 
                 var imageName = $"{Guid.NewGuid()}{Path.GetExtension(model.Image.FileName)}";
                 var imagePath = "/images/Subscribers";
@@ -200,20 +213,97 @@ namespace Bookify.Web.Controllers
                 model.ImageThumbnailUrl = $"{imagePath}/thumb/{imageName}";
             }
 
-            else if (!string.IsNullOrEmpty(Subscriber.ImageUrl))
+            else if (!string.IsNullOrEmpty(subscriber.ImageUrl))
             {
-                model.ImageUrl = Subscriber.ImageUrl;
-                model.ImageThumbnailUrl = Subscriber.ImageThumbnailUrl;
+                model.ImageUrl = subscriber.ImageUrl;
+                model.ImageThumbnailUrl = subscriber.ImageThumbnailUrl;
             }
 
-            Subscriber = _mapper.Map(model, Subscriber);
-            Subscriber.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-            Subscriber.LastUpdatedOn = DateTime.Now;
+            subscriber = _mapper.Map(model, subscriber);
+            subscriber.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            subscriber.LastUpdatedOn = DateTime.Now;
 
             _context.SaveChanges();
 
             return RedirectToAction(nameof(Details), new { id = model.Key });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task< IActionResult> RenewSubscription(string sKey) 
+        {
+
+            var subscriberId = int.Parse(_dataProtector.Unprotect(sKey));
+            var subscriber=_context.Subscribers.Include(s=>s.Subscriptions).SingleOrDefault(s=>s.Id==subscriberId);
+
+            if (subscriber is null)
+                return NotFound();
+
+            if (subscriber.IsBlackListed)
+                return BadRequest();
+
+            var lastSubscription = subscriber.Subscriptions.Last();
+
+            var startDate = lastSubscription.EndDate < DateTime.Today
+                            ? DateTime.Today
+                            : lastSubscription.EndDate.AddDays(1);
+
+            Subscription newSubscription = new()
+            {
+                CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value,
+                CreatedOn = DateTime.Now,
+                StartDate = startDate,
+                EndDate = startDate.AddYears(1)
+            };
+
+            subscriber.Subscriptions.Add(newSubscription);
+
+            _context.SaveChanges();
+
+            //send RenewSubscription email
+            var placeholders = new Dictionary<string, string>()
+                {
+                    {"imageUrl", "https://res.cloudinary.com/dfrvheqw9/image/upload/v1777908525/icon-positive-vote-2_jcxdww_2_ti6gst.svg"},
+                    {"header",    $"Welcome {subscriber.FirstName}," },
+                    {"body",  " thanks for Renew Subscription" }
+
+                };
+            var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Notification, placeholders);
+
+
+            await _emailSender.SendEmailAsync(subscriber.Email, "Renew Subscription", body);
+
+            //send RenewSubscription WhatsApp
+            if (subscriber.HasWhatsApp)
+            {
+                //var components = new List<WhatsAppComponent>()
+                //{
+                //    new WhatsAppComponent
+                //    {
+                //        Type="body",
+                //        Parameters=new List<object>()
+                //        {
+                //                  new WhatsAppTextParameter{ Text=model.FirstName}
+                //        }
+                //    }
+                //};
+
+                var mobileNumber = _webHostEnvironment
+                    .IsDevelopment() ? "01012905054" : subscriber.MobileNumber;
+
+                await _whatsAppClient
+                 .SendMessage($"2{mobileNumber}", WhatsAppLanguageCode.English_US, "hello_world"/*, components*/);
+
+            }
+
+
+            var viewModel = _mapper.Map<SubscriptionViewModel>(newSubscription);
+
+            return PartialView("_SubscriptionRow", viewModel);
+
+        }
+
+
 
         [AjaxOnly]
         public IActionResult GetAreas(int governorateId)
