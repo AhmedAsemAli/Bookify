@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.DataProtection;
+﻿using Hangfire;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -111,30 +112,29 @@ namespace Bookify.Web.Controllers
                 };
             var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Notification, placeholders);
 
-
-            await _emailSender.SendEmailAsync(model.Email, "Welcome to Bookify", body);
-        
+            BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(model.Email, "Welcome to Bookify", body));
 
             //send welcome WhatsApp
             if (model.HasWhatsApp)
             {
-                //var components = new List<WhatsAppComponent>()
-                //{
-                //    new WhatsAppComponent
-                //    {
-                //        Type="body",
-                //        Parameters=new List<object>()
-                //        {
-                //                  new WhatsAppTextParameter{ Text=model.FirstName}
-                //        }
-                //    }
-                //};
+                var components = new List<WhatsAppComponent>()
+                {
+                    new WhatsAppComponent
+                    {
+                        Type="body",
+                        Parameters=new List<object>()
+                        {
+                                  new WhatsAppTextParameter{ Text=model.FirstName}
+                        }
+                    }
+                };
 
                 var mobileNumber= _webHostEnvironment
                     .IsDevelopment() ? "01012905054" : model.MobileNumber;
 
-                await _whatsAppClient
-                 .SendMessage($"2{mobileNumber}", WhatsAppLanguageCode.English_US, "hello_world"/*, components*/);
+                BackgroundJob.Enqueue(() => _whatsAppClient
+                 .SendMessage($"2{mobileNumber}", WhatsAppLanguageCode.English, WhatsAppTemplates.WelcomeMessage, components));
+
            
             }
 
@@ -230,7 +230,7 @@ namespace Bookify.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task< IActionResult> RenewSubscription(string sKey) 
+        public  IActionResult RenewSubscription(string sKey) 
         {
 
             var subscriberId = int.Parse(_dataProtector.Unprotect(sKey));
@@ -270,8 +270,8 @@ namespace Bookify.Web.Controllers
                 };
             var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Notification, placeholders);
 
+            BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(subscriber.Email, "Renew Subscription", body));
 
-            await _emailSender.SendEmailAsync(subscriber.Email, "Renew Subscription", body);
 
             //send RenewSubscription WhatsApp
             if (subscriber.HasWhatsApp)
@@ -290,10 +290,10 @@ namespace Bookify.Web.Controllers
 
                 var mobileNumber = _webHostEnvironment
                     .IsDevelopment() ? "01012905054" : subscriber.MobileNumber;
+                BackgroundJob.Enqueue(() => _whatsAppClient
+                 .SendMessage($"2{mobileNumber}", WhatsAppLanguageCode.English_US, "hello_world"/*, components*/));
 
-                await _whatsAppClient
-                 .SendMessage($"2{mobileNumber}", WhatsAppLanguageCode.English_US, "hello_world"/*, components*/);
-
+            
             }
 
 
@@ -353,6 +353,9 @@ namespace Bookify.Web.Controllers
 
         }
 
+
+      
+        
         private SubscriberFormViewModel PopulateViewModel(SubscriberFormViewModel? model = null)
         {
             SubscriberFormViewModel viewModel = model is null ? new SubscriberFormViewModel() : model;
