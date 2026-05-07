@@ -8,5 +8,6 @@
 
         public DateTime StartDate { get; set; }= DateTime.Today;
         public bool PenaltyPaid { get; set; }
+        public ICollection<RentalCopy> RentalCopies { get; set; } = new List<RentalCopy>();
     }
 }

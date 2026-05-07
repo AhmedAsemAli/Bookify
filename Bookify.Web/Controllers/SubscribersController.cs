@@ -151,6 +151,8 @@ namespace Bookify.Web.Controllers
                 .Include(s=>s.Governorate)
                 .Include(s=>s.Area)
                 .Include(s=>s.Subscriptions)
+                .Include(s=>s.Rentals)
+                .ThenInclude(r=>r.RentalCopies)
                 .FirstOrDefault(s=>s.Id== subscriberId);
 
             if (subscriber is null)
@@ -262,38 +264,39 @@ namespace Bookify.Web.Controllers
 
             //send RenewSubscription email
             var placeholders = new Dictionary<string, string>()
-                {
-                    {"imageUrl", "https://res.cloudinary.com/dfrvheqw9/image/upload/v1777908525/icon-positive-vote-2_jcxdww_2_ti6gst.svg"},
-                    {"header",    $"Welcome {subscriber.FirstName}," },
-                    {"body",  " thanks for Renew Subscription" }
+            {
+                { "imageUrl", "https://res.cloudinary.com/devcreed/image/upload/v1668739431/icon-positive-vote-2_jcxdww.svg" },
+                { "header", $"Hello {subscriber.FirstName}," },
+                { "body", $"your subscription has been renewed through {newSubscription.EndDate.ToString("d MMM, yyyy")} 🎉🎉" }
+            };
 
-                };
             var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Notification, placeholders);
 
-            BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(subscriber.Email, "Renew Subscription", body));
-
+            BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(
+                subscriber.Email,
+                "Bookify Subscription Renewal", body));
 
             //send RenewSubscription WhatsApp
             if (subscriber.HasWhatsApp)
             {
-                //var components = new List<WhatsAppComponent>()
-                //{
-                //    new WhatsAppComponent
-                //    {
-                //        Type="body",
-                //        Parameters=new List<object>()
-                //        {
-                //                  new WhatsAppTextParameter{ Text=model.FirstName}
-                //        }
-                //    }
-                //};
+                var components = new List<WhatsAppComponent>()
+                {
+                    new WhatsAppComponent
+                    {
+                        Type = "body",
+                        Parameters = new List<object>()
+                        {
+                            new WhatsAppTextParameter { Text = subscriber.FirstName },
+                            new WhatsAppTextParameter { Text = newSubscription.EndDate.ToString("d MMM, yyyy") },
+                        }
+                    }
+                };
 
-                var mobileNumber = _webHostEnvironment
-                    .IsDevelopment() ? "01012905054" : subscriber.MobileNumber;
+                var mobileNumber = _webHostEnvironment.IsDevelopment() ? "01012905054" : subscriber.MobileNumber;
+
                 BackgroundJob.Enqueue(() => _whatsAppClient
-                 .SendMessage($"2{mobileNumber}", WhatsAppLanguageCode.English_US, "hello_world"/*, components*/));
-
-            
+                    .SendMessage($"2{mobileNumber}", WhatsAppLanguageCode.English,
+                    WhatsAppTemplates.SubscriptionRenew, components));
             }
 
 

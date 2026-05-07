@@ -68,7 +68,6 @@ namespace Bookify.Web.Tasks
 
                     var mobileNumber = _webHostEnvironment.IsDevelopment() ? "01012905054" : subscriber.MobileNumber;
 
-                    //Change 2 with your country code
                     await _whatsAppClient
                         .SendMessage($"2{mobileNumber}", WhatsAppLanguageCode.English,
                         WhatsAppTemplates.SubscriptionExpiration, components);
