@@ -15,6 +15,8 @@
         public string? LastUpdatedById { get; set; }
         public ApplicationUser? LastUpdatedBy { get; set; }
         public DateTime? LastUpdatedOn { get; set; }
+        public ICollection<RentalCopy> Rentals { get; set; } = new List<RentalCopy>();
+
 
     }
 }

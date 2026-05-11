@@ -29,13 +29,13 @@ namespace Bookify.Web
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
-           // builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
+            // builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
             builder.Services.Configure<SecurityStampValidatorOptions>(options => options.ValidationInterval = TimeSpan.Zero);
             //builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
             //    .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            builder.Services.AddIdentity<ApplicationUser,IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();
@@ -54,29 +54,29 @@ namespace Bookify.Web
             builder.Services.AddTransient<IImageService, ImageService>();
             builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddTransient<IEmailBodyBuilder, EmailBodyBuilder>();
-           
+
             builder.Services.AddControllersWithViews();
-           
+
             builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(MappingProfile)));
 
-           
+
             builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)));
             builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
 
             builder.Services.AddWhatsAppApiClient(builder.Configuration);
-            
+
             builder.Services.AddExpressiveAnnotations();
 
             builder.Services.AddHangfire(x => x.UseSqlServerStorage(connectionString));
             builder.Services.AddHangfireServer();
-            builder.Services.Configure<AuthorizationOptions>(options => options.AddPolicy("AdminsOnly", policy => 
+            builder.Services.Configure<AuthorizationOptions>(options => options.AddPolicy("AdminsOnly", policy =>
             {
 
                 policy.RequireAuthenticatedUser();
                 policy.RequireRole(AppRoles.Admin);
-            
+
             }));
-            
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -100,20 +100,21 @@ namespace Bookify.Web
             app.UseAuthorization();
 
             var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
-            using var scope =scopeFactory.CreateScope();
+            using var scope = scopeFactory.CreateScope();
             var roleManger = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManger = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
             await DefaultRoles.SeedAsync(roleManger);
             await DefaultUsers.SeedAdminUserAsync(userManger);
 
-            app.UseHangfireDashboard("/hangfire",new DashboardOptions { 
-            
-            
-                DashboardTitle= "Bookify Dashboard",
-                IsReadOnlyFunc=(DashboardContext context)=>true,
-                Authorization=new IDashboardAuthorizationFilter[]
-                { 
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+
+
+                DashboardTitle = "Bookify Dashboard",
+                //IsReadOnlyFunc = (DashboardContext context) => true,
+                Authorization = new IDashboardAuthorizationFilter[]
+                {
                     new HangfireAuthorizationFilter("AdminsOnly")
                 }
             });
@@ -130,6 +131,15 @@ namespace Bookify.Web
             RecurringJob.AddOrUpdate(
      "subscription-expiration-alert",
      () => hangfireTasks.PrepareExpirationAlert(),
+     "0 14 * * *",
+     new RecurringJobOptions
+     {
+         TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time")
+     });
+
+            RecurringJob.AddOrUpdate(
+     "rentals-expiration-alert",
+     () => hangfireTasks.RentalsExpirationAlert(),
      "0 14 * * *",
      new RecurringJobOptions
      {
