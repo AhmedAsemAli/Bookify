@@ -7,6 +7,7 @@ using Bookify.Web.Settings;
 using Bookify.Web.Tasks;
 using Hangfire;
 using Hangfire.Dashboard;
+using HashidsNet;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -49,6 +50,7 @@ namespace Bookify.Web
 
             builder.Services.AddDataProtection().SetApplicationName(nameof(Bookify));
 
+            builder.Services.AddSingleton<IHashids>(_ => new Hashids("find1ngn3m0", minHashLength: 11));
             builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
             builder.Services.AddTransient<IImageService, ImageService>();
