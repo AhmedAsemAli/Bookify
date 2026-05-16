@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
+using ViewToHTML.Extensions;
 using WhatsAppCloudApi.Extensions;
 using WhatsAppCloudApi.Services;
 
@@ -78,6 +79,7 @@ namespace Bookify.Web
                 policy.RequireRole(AppRoles.Admin);
 
             }));
+            builder.Services.AddViewToHTML();
 
             var app = builder.Build();
 
