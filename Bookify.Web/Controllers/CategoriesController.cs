@@ -29,7 +29,6 @@ namespace Bookify.Web.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Create(CategoryFormViewModel model)
         {
             if (!ModelState.IsValid)
@@ -56,7 +55,6 @@ namespace Bookify.Web.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Edit(CategoryFormViewModel model)
         {
             if (!ModelState.IsValid)
@@ -75,7 +73,6 @@ namespace Bookify.Web.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult ToggleStatus(int id) 
         {
             var category= _context.Categories.Find(id);

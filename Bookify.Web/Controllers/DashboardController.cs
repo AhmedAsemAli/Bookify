@@ -17,7 +17,7 @@ namespace Bookify.Web.Controllers
 
         public IActionResult Index()
         {
-
+            
             var numberOfCopies = _context.BookCopies.Count(c => !c.IsDeleted);
 
             numberOfCopies = numberOfCopies <= 10 ? numberOfCopies : numberOfCopies / 10 * 10;
