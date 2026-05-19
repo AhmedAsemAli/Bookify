@@ -1,5 +1,4 @@
-﻿using Bookify.Web.Core.Consts;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Bookify.Web.Seeds
 {

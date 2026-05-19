@@ -1,5 +1,4 @@
 ﻿using HashidsNet;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Bookify.Web.Controllers
 {
@@ -22,17 +21,17 @@ namespace Bookify.Web.Controllers
 
         public IActionResult Find(string query)
         {
-            var books=_context.Books
-                .Include(b=>b.Author)
-                .Where(b=>!b.isDeleted&&(b.Title.Contains(query) ||b.Author!.Name.Contains(query)))
-                .Select(b => new {b.Title,Author=b.Author!.Name,Key=_hashids.EncodeHex(b.Id.ToString())})
+            var books = _context.Books
+                .Include(b => b.Author)
+                .Where(b => !b.isDeleted && (b.Title.Contains(query) || b.Author!.Name.Contains(query)))
+                .Select(b => new { b.Title, Author = b.Author!.Name, Key = _hashids.EncodeHex(b.Id.ToString()) })
                 .ToList();
 
             return Ok(books);
         }
         public IActionResult Details(string bkey)
         {
-            var bookId=_hashids.DecodeHex(bkey);
+            var bookId = _hashids.DecodeHex(bkey);
 
             if (bookId.Length == 0)
                 return NotFound();
@@ -47,8 +46,8 @@ namespace Bookify.Web.Controllers
             if (book is null)
                 return NotFound();
 
-            var viewModel=_mapper.Map<BookViewModel>(book);
-            
+            var viewModel = _mapper.Map<BookViewModel>(book);
+
             return View(viewModel);
         }
     }

@@ -2,15 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Bookify.Web.Core.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace Bookify.Web.Areas.Identity.Pages.Account
 {
@@ -62,13 +57,13 @@ namespace Bookify.Web.Areas.Identity.Pages.Account
             //    StatusMessage = "Error changing user name.";
             //    return Page();
             //}
-         
+
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Thank you for confirming your email change.";
             return Page();
 
-         
+
         }
     }
 }

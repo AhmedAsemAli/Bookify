@@ -1,16 +1,15 @@
 
 using HashidsNet;
 using Microsoft.AspNetCore.WebUtilities;
-using System.Diagnostics;
 
 namespace Bookify.Web.Controllers
 {
-    
+
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
-        private readonly IHashids _hashids ;
+        private readonly IHashids _hashids;
 
         public HomeController(ApplicationDbContext context, IMapper mapper, IHashids hashids)
         {
@@ -32,21 +31,21 @@ namespace Bookify.Web.Controllers
                 .ToList();
 
             var viewModel = _mapper.Map<IEnumerable<BookViewModel>>(lastAddedBooks);
-          
+
             foreach (var book in viewModel)
             {
                 book.Key = _hashids.EncodeHex(book.Id.ToString());
             }
-            
+
             return View(viewModel);
         }
 
-      
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error(int statusCode = 500)
         {
-            return View(new ErrorViewModel {ErrorCode= statusCode, ErrorDescription=ReasonPhrases.GetReasonPhrase(statusCode) });
+            return View(new ErrorViewModel { ErrorCode = statusCode, ErrorDescription = ReasonPhrases.GetReasonPhrase(statusCode) });
         }
     }
 }

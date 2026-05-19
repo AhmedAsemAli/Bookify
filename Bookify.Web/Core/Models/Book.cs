@@ -1,6 +1,6 @@
 ﻿namespace Bookify.Web.Core.Models
 {
-    [Index(nameof(Title),nameof(AuthorId),IsUnique =true)]
+    [Index(nameof(Title), nameof(AuthorId), IsUnique = true)]
     public class Book
     {
         public int Id { get; set; }
@@ -31,7 +31,7 @@
         public bool IsAvailableForRental { get; set; }
         public string Description { get; set; } = null!;
 
-        public ICollection<BookCategory> Categories { get; set; }=new List<BookCategory>();
-        public ICollection<BookCopy> Copies { get; set; }=new List<BookCopy>();
+        public ICollection<BookCategory> Categories { get; set; } = new List<BookCategory>();
+        public ICollection<BookCopy> Copies { get; set; } = new List<BookCopy>();
     }
 }

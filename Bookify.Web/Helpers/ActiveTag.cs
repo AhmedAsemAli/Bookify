@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Bookify.Web.Helpers
 {
-    [HtmlTargetElement("a",Attributes ="active-when")]
-    public class ActiveTag:TagHelper
+    [HtmlTargetElement("a", Attributes = "active-when")]
+    public class ActiveTag : TagHelper
     {
         public string? ActiveWhen { get; set; }
 
@@ -17,12 +17,12 @@ namespace Bookify.Web.Helpers
         {
             if (string.IsNullOrEmpty(ActiveWhen))
                 return;
-            var currentController = ViewContextData?.RouteData.Values["controller"]?.ToString()?? string.Empty;
+            var currentController = ViewContextData?.RouteData.Values["controller"]?.ToString() ?? string.Empty;
             if (currentController!.Equals(ActiveWhen))
             {
                 if (output.Attributes.ContainsName("class"))
                 {
-                    output.Attributes.SetAttribute("class",$"{output.Attributes["class"].Value} active");
+                    output.Attributes.SetAttribute("class", $"{output.Attributes["class"].Value} active");
                 }
                 else
                 {

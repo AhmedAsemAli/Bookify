@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-
-namespace Bookify.Web.Controllers
+﻿namespace Bookify.Web.Controllers
 {
     [Authorize(Roles = AppRoles.Archive)]
     public class AuthorsController : Controller
@@ -29,14 +26,14 @@ namespace Bookify.Web.Controllers
         }
 
         [HttpPost]
-   
+
         public IActionResult Create(AuthorFormViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
 
             var author = _mapper.Map<Author>(model);
-            author.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            author.CreatedById = User.GetUserId();
             _context.Authors.Add(author);
             _context.SaveChanges();
             var viewModel = _mapper.Map<AuthorViewModel>(author);
@@ -65,7 +62,7 @@ namespace Bookify.Web.Controllers
                 return NotFound();
 
             author = _mapper.Map(model, author);
-            author.LastUpdatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            author.LastUpdatedById = User.GetUserId();
             author.LastUpdatedOn = DateTime.Now;
             _context.SaveChanges();
 
@@ -81,7 +78,7 @@ namespace Bookify.Web.Controllers
                 return NotFound();
 
             author.isDeleted = !author.isDeleted;
-            author.LastUpdatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            author.LastUpdatedById = User.GetUserId();
             author.LastUpdatedOn = DateTime.Now;
             _context.SaveChanges();
             //TempData["Message"] = "Saved successfully!";

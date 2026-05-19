@@ -5,6 +5,6 @@ namespace Bookify.Web.Core.ViewModels
         public int ErrorCode { get; set; }
         public string? ErrorDescription { get; set; }
 
-       
+
     }
 }

@@ -1,12 +1,7 @@
-﻿using Bookify.Web.Filters;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
+﻿using CloudinaryDotNet;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Options;
-using NuGet.Packaging.Signing;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-using System.Linq;
 using System.Linq.Dynamic.Core;
 
 namespace Bookify.Web.Controllers
@@ -83,21 +78,21 @@ namespace Bookify.Web.Controllers
         {
             var book = _context.Books
                 .Include(b => b.Author)
-                .Include(b=>b.Copies)
-                .Include(b=>b.Categories)
-                .ThenInclude(c=>c.Category)
+                .Include(b => b.Copies)
+                .Include(b => b.Categories)
+                .ThenInclude(c => c.Category)
                 .SingleOrDefault(b => b.Id == id);
             if (book is null)
                 return NotFound();
 
-            var viewModel= _mapper.Map<BookViewModel>(book);
+            var viewModel = _mapper.Map<BookViewModel>(book);
             return View(viewModel);
         }
 
-        public IActionResult Create() 
-        
+        public IActionResult Create()
+
         {
-          
+
             return View("Form", PopulateViewModel());
         }
 
@@ -106,27 +101,27 @@ namespace Bookify.Web.Controllers
 
         {
             if (!ModelState.IsValid)
-               return View("Form", PopulateViewModel(model));
-           
-            var book=_mapper.Map<Book>(model);
+                return View("Form", PopulateViewModel(model));
+
+            var book = _mapper.Map<Book>(model);
 
             if (model.Image is not null)
             {
 
                 var imageName = $"{Guid.NewGuid()}{Path.GetExtension(model.Image.FileName)}";
 
-                var (isUploaded,errorMessage) = await _imageService.UploadAsync(model.Image, imageName, "/images/books", hasThumbnail: true);
-                if (isUploaded) 
+                var (isUploaded, errorMessage) = await _imageService.UploadAsync(model.Image, imageName, "/images/books", hasThumbnail: true);
+                if (isUploaded)
                 {
-                   book.ImageUrl = $"/images/books/{imageName}";
-                   book.ImageThumbnailUrl = $"/images/books/thumb/{imageName}";
+                    book.ImageUrl = $"/images/books/{imageName}";
+                    book.ImageThumbnailUrl = $"/images/books/thumb/{imageName}";
                 }
                 else
                 {
                     ModelState.AddModelError(nameof(Image), errorMessage!);
                     return View("Form", PopulateViewModel(model));
                 }
-             
+
 
                 //using var stream = model.Image.OpenReadStream();
                 //var imageParams = new ImageUploadParams
@@ -141,7 +136,7 @@ namespace Bookify.Web.Controllers
                 //book.ImagePublicId = result.PublicId;
             }
 
-            book.CreatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            book.CreatedById = User.GetUserId();
             foreach (var category in model.SelectedCategories)
             {
                 book.Categories.Add(new BookCategory { CategoryId = category });
@@ -150,12 +145,12 @@ namespace Bookify.Web.Controllers
             _context.Books.Add(book);
             _context.SaveChanges();
 
-            return RedirectToAction(nameof(Details), new { id =book.Id});
+            return RedirectToAction(nameof(Details), new { id = book.Id });
         }
 
         public IActionResult Edit(int id)
         {
-            var book = _context.Books.Include(b=>b.Categories).SingleOrDefault(b=>b.Id==id);
+            var book = _context.Books.Include(b => b.Categories).SingleOrDefault(b => b.Id == id);
 
             if (book is null)
                 return NotFound();
@@ -207,7 +202,7 @@ namespace Bookify.Web.Controllers
                     return View("Form", PopulateViewModel(model));
                 }
 
-               
+
 
                 //using var stream = model.Image.OpenReadStream();
                 //var imageParams = new ImageUploadParams
@@ -222,17 +217,17 @@ namespace Bookify.Web.Controllers
 
             }
 
-            else if ( !string.IsNullOrEmpty(book.ImageUrl))
+            else if (!string.IsNullOrEmpty(book.ImageUrl))
             {
                 model.ImageUrl = book.ImageUrl;
                 model.ImageThumbnailUrl = book.ImageThumbnailUrl;
             }
 
             book = _mapper.Map(model, book);
-            book.LastUpdatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            book.LastUpdatedById = User.GetUserId();
             book.LastUpdatedOn = DateTime.Now;
-           // book.ImageThumbnailUrl = GetThumbnailUrl(book.ImageUrl!);
-           // book.ImagePublicId = imagePublicId;
+            // book.ImageThumbnailUrl = GetThumbnailUrl(book.ImageUrl!);
+            // book.ImagePublicId = imagePublicId;
 
             foreach (var category in model.SelectedCategories)
                 book.Categories.Add(new BookCategory { CategoryId = category });
@@ -257,7 +252,7 @@ namespace Bookify.Web.Controllers
                 return NotFound();
 
             book.isDeleted = !book.isDeleted;
-            book.LastUpdatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            book.LastUpdatedById = User.GetUserId();
             book.LastUpdatedOn = DateTime.Now;
 
             _context.SaveChanges();
@@ -272,7 +267,7 @@ namespace Bookify.Web.Controllers
 
             return Json(isAllowed);
         }
-        private BookFormViewModel PopulateViewModel(BookFormViewModel? model=null) 
+        private BookFormViewModel PopulateViewModel(BookFormViewModel? model = null)
         {
             BookFormViewModel viewModel;
             var author = _context.Authors.Where(a => !a.isDeleted).OrderBy(a => a.Name).ToList();
@@ -289,10 +284,10 @@ namespace Bookify.Web.Controllers
             return viewModel;
         }
 
-        private string GetThumbnailUrl(string url) 
+        private string GetThumbnailUrl(string url)
         {
             var separator = "image/upload/";
-            var urlParts= url.Split(separator);
+            var urlParts = url.Split(separator);
 
             var thumbnailUrl = $"{urlParts[0]}{separator}c_thumb,w_200,g_face/{urlParts[1]}";
 

@@ -26,13 +26,13 @@ namespace Bookify.Web.Services
                 IsBodyHtml = true
             };
 
-            message.To.Add(_webHostEnvironment.IsDevelopment()? "ahmed.hendia1701497@science.menofia.edu.eg": email);
+            message.To.Add(_webHostEnvironment.IsDevelopment() ? "ahmed.hendia1701497@science.menofia.edu.eg" : email);
 
             SmtpClient smtpClient = new(_mailSettings.Host)
             {
-                Port= _mailSettings.Port,
-                Credentials=new NetworkCredential(_mailSettings.Email,_mailSettings.Password),
-                EnableSsl=true
+                Port = _mailSettings.Port,
+                Credentials = new NetworkCredential(_mailSettings.Email, _mailSettings.Password),
+                EnableSsl = true
             };
 
             await smtpClient.SendMailAsync(message);

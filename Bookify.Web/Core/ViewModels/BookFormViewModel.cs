@@ -1,5 +1,4 @@
-﻿using Bookify.Web.Core.Consts;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using UoN.ExpressiveAnnotations.NetCore.Attributes;
 
 namespace Bookify.Web.Core.ViewModels
@@ -8,12 +7,12 @@ namespace Bookify.Web.Core.ViewModels
     {
         public int Id { get; set; }
 
-        [MaxLength(500 ,ErrorMessage = "Length cannot be more than 500 characters")]
+        [MaxLength(500, ErrorMessage = "Length cannot be more than 500 characters")]
         [Remote("AllowItem", null!, AdditionalFields = "Id,AuthorId", ErrorMessage = Errors.DuplicatedBook)]
 
         public string Title { get; set; } = null!;
 
-        [Display(Name ="Author")]
+        [Display(Name = "Author")]
         [Remote("AllowItem", null!, AdditionalFields = "Id,Title", ErrorMessage = Errors.DuplicatedBook)]
 
         public int AuthorId { get; set; }
@@ -22,8 +21,8 @@ namespace Bookify.Web.Core.ViewModels
         [MaxLength(200, ErrorMessage = "Length cannot be more than 200 characters")]
         public string Publisher { get; set; } = null!;
         [Display(Name = "Publishing Date")]
-        [AssertThat("PublishingDate <= Today()",ErrorMessage =Errors.NotAllowFutureDates)]
-        public DateTime PublishingDate { get; set; }=DateTime.Now;
+        [AssertThat("PublishingDate <= Today()", ErrorMessage = Errors.NotAllowFutureDates)]
+        public DateTime PublishingDate { get; set; } = DateTime.Now;
         public IFormFile? Image { get; set; }
 
         public string? ImageUrl { get; set; }

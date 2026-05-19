@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-
-namespace Bookify.Web.Controllers
+﻿namespace Bookify.Web.Controllers
 {
     [Authorize(Roles = AppRoles.Archive)]
     public class BookCopiesController : Controller
@@ -15,19 +12,19 @@ namespace Bookify.Web.Controllers
             _mapper = mapper;
         }
 
-        public IActionResult Create(int bookId) 
+        public IActionResult Create(int bookId)
         {
             var book = _context.Books.Find(bookId);
 
-            if(book is null)
+            if (book is null)
                 return NotFound();
 
-            var viewModel=new BookCopyFormViewModel 
-            { 
+            var viewModel = new BookCopyFormViewModel
+            {
                 BookId = bookId,
-                ShowRentalInput=book.IsAvailableForRental
+                ShowRentalInput = book.IsAvailableForRental
             };
-            return PartialView("Form",viewModel);
+            return PartialView("Form", viewModel);
         }
 
         [HttpPost]
@@ -45,19 +42,19 @@ namespace Bookify.Web.Controllers
             var copy = new BookCopy()
             {
                 EditionNumber = model.EditionNumber,
-                IsAvilableForRental=book.IsAvailableForRental? model.IsAvilableForRental:false,
-                CreatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+                IsAvilableForRental = book.IsAvailableForRental ? model.IsAvilableForRental : false,
+                CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value
 
             };
             book.Copies.Add(copy);
             _context.SaveChanges();
-            
-            var viewModel=_mapper.Map<BookCopyViewModel>(copy);
+
+            var viewModel = _mapper.Map<BookCopyViewModel>(copy);
             return PartialView("_BookCopyRow", viewModel);
 
         }
         [AjaxOnly]
-        public IActionResult Edit(int id) 
+        public IActionResult Edit(int id)
         {
             var copy = _context.BookCopies.Include(c => c.Book).SingleOrDefault(c => c.Id == id);
             if (copy is null)
@@ -82,7 +79,7 @@ namespace Bookify.Web.Controllers
 
             copy.EditionNumber = model.EditionNumber;
             copy.IsAvilableForRental = copy.Book!.IsAvailableForRental && model.IsAvilableForRental;
-           copy.LastUpdatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            copy.LastUpdatedById = User.GetUserId();
             copy.LastUpdatedOn = DateTime.Now;
 
             _context.SaveChanges();
@@ -113,9 +110,9 @@ namespace Bookify.Web.Controllers
             var copy = _context.BookCopies.Find(id);
             if (copy is null)
                 return NotFound();
-            copy.IsDeleted=!copy.IsDeleted;
+            copy.IsDeleted = !copy.IsDeleted;
             copy.LastUpdatedOn = DateTime.Now;
-            copy.LastUpdatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            copy.LastUpdatedById = User.GetUserId();
             _context.SaveChanges();
             return Ok();
         }

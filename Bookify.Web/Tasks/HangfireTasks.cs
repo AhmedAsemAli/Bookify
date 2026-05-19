@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
-using WhatsAppCloudApi;
-using WhatsAppCloudApi.Services;
 
 
 namespace Bookify.Web.Tasks
@@ -115,7 +113,7 @@ namespace Bookify.Web.Tasks
                     "Bookify Rental Expiration 🔔", body);
             }
         }
-      
+
 
     }
 }

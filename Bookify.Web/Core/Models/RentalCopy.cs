@@ -1,6 +1,4 @@
-﻿using Bookify.Web.Core.Enums;
-
-namespace Bookify.Web.Core.Models
+﻿namespace Bookify.Web.Core.Models
 {
     public class RentalCopy
     {
@@ -9,9 +7,9 @@ namespace Bookify.Web.Core.Models
         public int BookCopyId { get; set; }
         public BookCopy? BookCopy { get; set; }
         public DateTime RentalDate { get; set; } = DateTime.Today;
-        public DateTime EndDate { get; set; }=DateTime.Today.AddDays((int)RentalsConfigurations.RentalDuration);
+        public DateTime EndDate { get; set; } = DateTime.Today.AddDays((int)RentalsConfigurations.RentalDuration);
         public DateTime? ReturnDate { get; set; }
-        public DateTime? ExtendedOn { get; set; }   
+        public DateTime? ExtendedOn { get; set; }
 
     }
 }

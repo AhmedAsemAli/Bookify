@@ -15,7 +15,7 @@ namespace Bookify.Web.Services
             _webHostEnvironment = webHostEnvironment;
         }
 
-      
+
 
         public async Task<(bool isUploaded, string? errorMessage)> UploadAsync(IFormFile image, string imageName, string folderPath, bool hasThumbnail)
         {
@@ -60,10 +60,10 @@ namespace Bookify.Web.Services
                 var oldThumbnailPath = $"{_webHostEnvironment.WebRootPath}{imageThumbnailPath}";
 
                 if (File.Exists(oldThumbnailPath))
-                           File.Delete(oldThumbnailPath);
+                    File.Delete(oldThumbnailPath);
             }
 
-          
+
 
         }
     }

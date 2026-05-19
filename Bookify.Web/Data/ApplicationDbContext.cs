@@ -1,6 +1,4 @@
-﻿using Bookify.Web.Core.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Bookify.Web.Data
 {
@@ -33,9 +31,9 @@ namespace Bookify.Web.Data
                 .StartsAt(1000001);
 
             builder.Entity<BookCopy>().Property(e => e.SerialNumber).HasDefaultValueSql("NEXT VALUE FOR shared.SerialNumber");
-            
+
             builder.Entity<BookCategory>().HasKey(e => new { e.BookId, e.CategoryId });
-          
+
             builder.Entity<RentalCopy>().HasKey(e => new { e.RentalId, e.BookCopyId });
 
             builder.Entity<Rental>().HasQueryFilter(e => !e.IsDeleted);
@@ -49,7 +47,7 @@ namespace Bookify.Web.Data
             {
                 fk.DeleteBehavior = DeleteBehavior.Restrict;
             }
-            
+
             base.OnModelCreating(builder);
         }
     }

@@ -14,7 +14,7 @@ namespace Bookify.Web.Filters
 
         public bool Authorize([NotNull] DashboardContext context)
         {
-            var httpContext=context.GetHttpContext();
+            var httpContext = context.GetHttpContext();
             var authService = httpContext.RequestServices.GetRequiredService<IAuthorizationService>();
             var isAuthorized = authService.AuthorizeAsync(httpContext.User, _policyName)
                             .ConfigureAwait(false)

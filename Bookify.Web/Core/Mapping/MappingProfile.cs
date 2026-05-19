@@ -1,11 +1,8 @@
-﻿using AutoMapper;
-using Bookify.Web.Core.Models;
-using Bookify.Web.Core.ViewModels;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Bookify.Web.Core.Mapping
 {
-    public class MappingProfile:Profile
+    public class MappingProfile : Profile
     {
         public MappingProfile()
         {
@@ -30,16 +27,16 @@ namespace Bookify.Web.Core.Mapping
 
             CreateMap<Book, BookViewModel>()
                 .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.Author!.Name))
-                .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.Categories.Select(c=>c.Category!.Name).ToList()));
+                .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.Categories.Select(c => c.Category!.Name).ToList()));
 
             CreateMap<BookCopy, BookCopyViewModel>()
-               .ForMember(dest => dest.BookTitle,opt => opt.MapFrom(src => src.Book!.Title))
+               .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Book!.Title))
                .ForMember(dest => dest.BookId, opt => opt.MapFrom(src => src.Book!.Id))
                .ForMember(dest => dest.BookThumbnailUrl, opt => opt.MapFrom(src => src.Book!.ImageThumbnailUrl));
 
             CreateMap<BookCopy, BookCopyFormViewModel>();
-            
-            
+
+
             //Users
             CreateMap<ApplicationUser, UserViewModel>();
             CreateMap<UserFormViewModel, ApplicationUser>()

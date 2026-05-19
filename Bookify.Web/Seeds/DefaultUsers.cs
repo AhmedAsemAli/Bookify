@@ -1,5 +1,4 @@
-﻿using Bookify.Web.Core.Consts;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Bookify.Web.Seeds
 {
@@ -17,11 +16,11 @@ namespace Bookify.Web.Seeds
             };
 
             var user = await userManager.FindByEmailAsync(admin.Email);
-            if (user is null) 
+            if (user is null)
             {
-                await userManager.CreateAsync(admin,"P@ssword123");
+                await userManager.CreateAsync(admin, "P@ssword123");
                 await userManager.AddToRoleAsync(admin, AppRoles.Admin);
-            } 
+            }
 
         }
     }

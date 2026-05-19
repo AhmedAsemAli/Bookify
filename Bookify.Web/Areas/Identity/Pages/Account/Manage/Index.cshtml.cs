@@ -2,13 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
-using Bookify.Web.Core.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Bookify.Web.Areas.Identity.Pages.Account.Manage
@@ -70,7 +64,7 @@ namespace Bookify.Web.Areas.Identity.Pages.Account.Manage
 
             public IFormFile Avatar { get; set; }
 
-            public bool  ImageRemoved { get; set; }
+            public bool ImageRemoved { get; set; }
         }
 
         private async Task LoadAsync(ApplicationUser user)
@@ -82,7 +76,7 @@ namespace Bookify.Web.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
-                FullName=user.FullName,
+                FullName = user.FullName,
                 PhoneNumber = phoneNumber
             };
         }
@@ -112,14 +106,14 @@ namespace Bookify.Web.Areas.Identity.Pages.Account.Manage
                 await LoadAsync(user);
                 return Page();
             }
-            if (Input.Avatar is not null) 
+            if (Input.Avatar is not null)
             {
                 _imageService.Delete($"/images/users/{user.Id}.png");
-                var (isUploaded, errorMessage) = await _imageService.UploadAsync(Input.Avatar, $"{user.Id}.png","/images/users",hasThumbnail:false);
+                var (isUploaded, errorMessage) = await _imageService.UploadAsync(Input.Avatar, $"{user.Id}.png", "/images/users", hasThumbnail: false);
 
                 if (!isUploaded)
                 {
-                    ModelState.AddModelError("Input.Avatar",errorMessage);
+                    ModelState.AddModelError("Input.Avatar", errorMessage);
                     await LoadAsync(user);
                     return Page();
                 }

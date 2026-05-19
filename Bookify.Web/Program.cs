@@ -1,24 +1,11 @@
-using Bookify.Web.Core.Mapping;
-using Bookify.Web.Data;
-using Bookify.Web.Helpers;
 using Bookify.Web.Seeds;
-using Bookify.Web.Services;
-using Bookify.Web.Settings;
 using Bookify.Web.Tasks;
 using Hangfire;
 using Hangfire.Dashboard;
-using HashidsNet;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Context;
-using System.Reflection;
-using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
-using ViewToHTML.Extensions;
-using WhatsAppCloudApi.Extensions;
-using WhatsAppCloudApi.Services;
 
 namespace Bookify.Web
 {
@@ -29,69 +16,18 @@ namespace Bookify.Web
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
-
-            // builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-            builder.Services.Configure<SecurityStampValidatorOptions>(options => options.ValidationInterval = TimeSpan.Zero);
-            //builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-            //    .AddEntityFrameworkStores<ApplicationDbContext>();
-
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultUI()
-                .AddDefaultTokenProviders();
-
-            builder.Services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequiredLength = 8;
-
-                options.User.RequireUniqueEmail = true;
-            });
-
-            builder.Services.AddDataProtection().SetApplicationName(nameof(Bookify));
-
-            builder.Services.AddSingleton<IHashids>(_ => new Hashids("find1ngn3m0", minHashLength: 11));
-            builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
-
-            builder.Services.AddTransient<IImageService, ImageService>();
-            builder.Services.AddTransient<IEmailSender, EmailSender>();
-            builder.Services.AddTransient<IEmailBodyBuilder, EmailBodyBuilder>();
-
-            builder.Services.AddControllersWithViews();
-
-            builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(MappingProfile)));
-
-
-            builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)));
-            builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
-
-            builder.Services.AddWhatsAppApiClient(builder.Configuration);
-
-            builder.Services.AddExpressiveAnnotations();
-
-            builder.Services.AddHangfire(x => x.UseSqlServerStorage(connectionString));
-            builder.Services.AddHangfireServer();
-            builder.Services.Configure<AuthorizationOptions>(options => options.AddPolicy("AdminsOnly", policy =>
-            {
-
-                policy.RequireAuthenticatedUser();
-                policy.RequireRole(AppRoles.Admin);
-
-            }));
-            builder.Services.AddViewToHTML();
-
-            builder.Services.AddMvc(option=>
-            option.Filters.Add(new AutoValidateAntiforgeryTokenAttribute())
-            );
-
+            builder.Services.AddBookifyServices(builder);
             //Add SeriLog
-            Log.Logger=new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
+            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
             builder.Host.UseSerilog();
 
             var app = builder.Build();
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("X-Frame-Options", "Deny");
+
+                await next();
+            });
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -100,11 +36,11 @@ namespace Bookify.Web
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            app.UseExceptionHandler("/Home/Error");
+            
 
             //app.UseStatusCodePages(async statusCodeContext =>
             //{
@@ -116,22 +52,19 @@ namespace Bookify.Web
             //});
 
             //app.UseStatusCodePagesWithRedirects("/Home/Error/{0}");
-            app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
+
+          
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.UseCookiePolicy(new CookiePolicyOptions { 
-            
-                Secure=CookieSecurePolicy.Always
-            });
+            //app.UseCookiePolicy(new CookiePolicyOptions
+            //{
 
-            app.Use(async (context, next) =>
-            {
-                context.Response.Headers.Add("X-Frame-Options", "Deny");
+            //    Secure = CookieSecurePolicy.Always
+            //});
 
-                await next();
-            });
+           
 
             app.UseRouting();
 
@@ -185,9 +118,9 @@ namespace Bookify.Web
          TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time")
      });
 
-            app.Use(async (context, next) => 
+            app.Use(async (context, next) =>
             {
-                LogContext.PushProperty("UserId",context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                LogContext.PushProperty("UserId", context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 LogContext.PushProperty("UserName", context.User.FindFirst(ClaimTypes.Name)?.Value);
                 await next();
             });

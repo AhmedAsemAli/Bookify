@@ -1,6 +1,4 @@
-﻿using Bookify.Web.Extensions;
-using ClosedXML.Excel;
-using Microsoft.AspNetCore.Mvc;
+﻿using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using OpenHtmlToPdf;
 using System.Net.Mime;
@@ -8,7 +6,7 @@ using ViewToHTML.Services;
 
 namespace Bookify.Web.Controllers
 {
-    [Authorize(Roles =AppRoles.Admin)]
+    [Authorize(Roles = AppRoles.Admin)]
     public class ReportsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -50,15 +48,15 @@ namespace Bookify.Web.Controllers
             }
             if (selectedCategories.Any())
             {
-                books = books.Where(b=>b.Categories.Any(c=>selectedCategories.Contains( c.CategoryId)));
+                books = books.Where(b => b.Categories.Any(c => selectedCategories.Contains(c.CategoryId)));
             }
-            var viewModel = new BooksReportViewModel 
-            { 
-               Authors=_mapper.Map<IEnumerable<SelectListItem>>(authors),
-               Categories=_mapper.Map<IEnumerable<SelectListItem>>(categories)
+            var viewModel = new BooksReportViewModel
+            {
+                Authors = _mapper.Map<IEnumerable<SelectListItem>>(authors),
+                Categories = _mapper.Map<IEnumerable<SelectListItem>>(categories)
             };
-            if(pageNumber is not null)
-                    viewModel.Books = PaginatedList<Book>.Create(books, pageNumber??0, (int)ReportsConfigurations.PageSize);
+            if (pageNumber is not null)
+                viewModel.Books = PaginatedList<Book>.Create(books, pageNumber ?? 0, (int)ReportsConfigurations.PageSize);
 
             return View(viewModel);
         }

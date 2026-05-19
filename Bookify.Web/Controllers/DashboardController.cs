@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Linq.Dynamic.Core;
+﻿using System.Linq.Dynamic.Core;
 
 namespace Bookify.Web.Controllers
 {
@@ -17,7 +16,7 @@ namespace Bookify.Web.Controllers
 
         public IActionResult Index()
         {
-            
+
             var numberOfCopies = _context.BookCopies.Count(c => !c.IsDeleted);
 
             numberOfCopies = numberOfCopies <= 10 ? numberOfCopies : numberOfCopies / 10 * 10;
@@ -64,15 +63,15 @@ namespace Bookify.Web.Controllers
                 NumberOfCopies = numberOfCopies,
                 NumberOfSubscribers = numberOfSubscribers,
                 LastAddedBooks = _mapper.Map<IEnumerable<BookViewModel>>(lastAddedBooks),
-                TopBooks=topBooks
-                
+                TopBooks = topBooks
+
 
             };
 
 
             return View(viewModel);
         }
-        
+
 
         [AjaxOnly]
         public IActionResult GetRentalsPerDay(DateTime? startDate, DateTime? endDate)

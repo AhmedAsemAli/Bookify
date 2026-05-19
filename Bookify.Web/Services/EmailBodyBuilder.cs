@@ -1,6 +1,4 @@
-﻿using System.Text.Encodings.Web;
-
-namespace Bookify.Web.Services
+﻿namespace Bookify.Web.Services
 {
     public class EmailBodyBuilder : IEmailBodyBuilder
     {
@@ -11,7 +9,7 @@ namespace Bookify.Web.Services
             _webHostEnvironment = webHostEnvironment;
         }
 
-        string IEmailBodyBuilder.GetEmailBody(string template,Dictionary<string,string> placeholders)
+        string IEmailBodyBuilder.GetEmailBody(string template, Dictionary<string, string> placeholders)
         {
 
             var filePath = $"{_webHostEnvironment.WebRootPath}/templates/{template}.html";
@@ -27,7 +25,7 @@ namespace Bookify.Web.Services
 
 
             return templateContent;
-       
+
 
         }
     }

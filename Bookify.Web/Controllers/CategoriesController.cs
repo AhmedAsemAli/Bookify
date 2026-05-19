@@ -1,7 +1,4 @@
-﻿
-using System.Security.Claims;
-
-namespace Bookify.Web.Controllers
+﻿namespace Bookify.Web.Controllers
 {
     [Authorize(Roles = AppRoles.Archive)]
     public class CategoriesController : Controller
@@ -17,8 +14,8 @@ namespace Bookify.Web.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            var categories = _context.Categories .AsNoTracking().ToList();
-            var viewModel=_mapper.Map<IEnumerable<CategoryViewModel>>(categories);
+            var categories = _context.Categories.AsNoTracking().ToList();
+            var viewModel = _mapper.Map<IEnumerable<CategoryViewModel>>(categories);
             return View(viewModel);
         }
         [HttpGet]
@@ -35,7 +32,7 @@ namespace Bookify.Web.Controllers
                 return BadRequest();
 
             var category = _mapper.Map<Category>(model);
-            category.CreatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            category.CreatedById = User.GetUserId();
             _context.Categories.Add(category);
             _context.SaveChanges();
             var viewModel = _mapper.Map<CategoryViewModel>(category);
@@ -63,8 +60,8 @@ namespace Bookify.Web.Controllers
             if (category is null)
                 return NotFound();
 
-            category=_mapper.Map(model,category);
-            category.LastUpdatedById= User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            category = _mapper.Map(model, category);
+            category.LastUpdatedById = User.GetUserId();
             category.LastUpdatedOn = DateTime.Now;
             _context.SaveChanges();
 
@@ -73,26 +70,26 @@ namespace Bookify.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult ToggleStatus(int id) 
+        public IActionResult ToggleStatus(int id)
         {
-            var category= _context.Categories.Find(id);
+            var category = _context.Categories.Find(id);
             if (category is null)
                 return NotFound();
 
             category.isDeleted = !category.isDeleted;
             category.LastUpdatedOn = DateTime.Now;
-            category.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            category.LastUpdatedById = User.GetUserId();
 
             _context.SaveChanges();
             //TempData["Message"] = "Saved successfully!";
             return Ok(category.LastUpdatedOn.ToString());
         }
 
-        public IActionResult AllowItem(CategoryFormViewModel model) 
+        public IActionResult AllowItem(CategoryFormViewModel model)
         {
 
             var category = _context.Categories.SingleOrDefault(c => c.Name == model.Name);
-            var isAllowed=category is null||category.Id.Equals(model.Id);
+            var isAllowed = category is null || category.Id.Equals(model.Id);
             return Json(isAllowed);
         }
     }

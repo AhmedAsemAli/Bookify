@@ -2,28 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Bookify.Web.Core.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
 
 namespace Bookify.Web.Areas.Identity.Pages.Account
 {
     public class LoginModel : PageModel
     {
-        
+
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
-      
+
         private readonly ILogger<LoginModel> _logger;
 
         public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger, UserManager<ApplicationUser> userManager)
@@ -71,7 +61,7 @@ namespace Bookify.Web.Areas.Identity.Pages.Account
             /// </summary>
             [Required]
             //[EmailAddress]
-            [Display(Name ="Username/Email")]
+            [Display(Name = "Username/Email")]
             public string Username { get; set; }
 
             /// <summary>
@@ -119,15 +109,15 @@ namespace Bookify.Web.Areas.Identity.Pages.Account
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var userName = Input.Username.ToUpper();
                 var user = await _userManager.Users
-                    .SingleOrDefaultAsync(u =>( u.NormalizedUserName == userName || u.NormalizedEmail == userName )&& !u.IsDeleted);
-              
+                    .SingleOrDefaultAsync(u => (u.NormalizedUserName == userName || u.NormalizedEmail == userName) && !u.IsDeleted);
+
                 if (user is null)
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
 
                 }
-                
+
                 var result = await _signInManager.PasswordSignInAsync(user, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
@@ -145,7 +135,7 @@ namespace Bookify.Web.Areas.Identity.Pages.Account
                 }
                 if (result.IsNotAllowed)
                 {
-                    return RedirectToPage("./ResendEmailConfirmation", new {userName=Input.Username });
+                    return RedirectToPage("./ResendEmailConfirmation", new { userName = Input.Username });
                 }
                 else
                 {
