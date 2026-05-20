@@ -1,4 +1,5 @@
-﻿using CloudinaryDotNet;
+﻿
+using CloudinaryDotNet;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
@@ -10,7 +11,7 @@ namespace Bookify.Web.Controllers
     public class BooksController : Controller
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly Cloudinary _cloudinary;
         private readonly IImageService _imageService;
@@ -19,7 +20,7 @@ namespace Bookify.Web.Controllers
         private List<string> _allowedExtensions = new() { ".jpg", ".jpeg", ".png" };
         private int _maxAllowedSize = 2097152;
 
-        public BooksController(ApplicationDbContext context, IMapper mapper,
+        public BooksController(IApplicationDbContext context, IMapper mapper,
             IWebHostEnvironment webHostEnvironment, IOptions<CloudinarySettings> cloudinary, IImageService imageService)
         {
             _context = context;

@@ -4,12 +4,14 @@
         queryTokenizer: Bloodhound.tokenizers.whitespace,
         remote: {
             url: '/Search/Find?query=%QUERY',
-            wildcard: '%QUERY'
+            wildcard: '%QUERY',
+            rateLimitBy: 'debounce',
+            rateLimitWait: 600      
         }
     });
 
     $('#Search').typeahead({
-        minLength: 4,
+        minLength: 1,
         highlight: true
     }, {
         name: 'book',

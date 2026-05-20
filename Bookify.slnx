@@ -1,3 +1,6 @@
 <Solution>
+  <Project Path="Bookify.Application/Bookify.Application.csproj" Id="43b4bdf0-afb3-46d2-ad80-3b10146c6b52" />
+  <Project Path="Bookify.Domain/Bookify.Domain.csproj" Id="167938b7-478c-4950-ba25-e915ccab9d48" />
+  <Project Path="Bookify.Infrastructure/Bookify.Infrastructure.csproj" Id="0ece10c0-2e23-4f9a-9ffe-1415591947ee" />
   <Project Path="Bookify.Web/Bookify.Web.csproj" />
 </Solution>
